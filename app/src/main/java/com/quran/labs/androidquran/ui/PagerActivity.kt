@@ -99,6 +99,7 @@ import com.quran.labs.androidquran.ui.fragment.TagBookmarkDialog.OnBookmarkTagsU
 import com.quran.labs.androidquran.ui.fragment.TranslationFragment
 import com.quran.labs.androidquran.ui.helpers.AyahSelectedListener
 import com.quran.labs.androidquran.ui.helpers.AyahTracker
+import com.quran.labs.androidquran.ui.helpers.BookPageTransformer
 import com.quran.labs.androidquran.ui.helpers.JumpDestination
 import com.quran.labs.androidquran.ui.helpers.QuranDisplayHelper
 import com.quran.labs.androidquran.ui.helpers.QuranPage
@@ -192,6 +193,9 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   private var promptedForExtraDownload = false
   private var progressDialog: ProgressDialog? = null
   private var isFoldableDeviceOpenAndVertical = false
+
+  private val bookPageTransformer = BookPageTransformer()
+  private var bookSpine: View? = null
 
   private var bookmarksMenuItem: MenuItem? = null
   private var isCurrentPageReadingBookmarked = false
@@ -380,6 +384,31 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       val pageIndex = quranInfo.getPositionFromPage(curPage, isDualPageVisible)
       viewPager.setCurrentItem(pageIndex)
     }
+    // the default for the book page turn depends on whether the device is unfolded
+    applyBookPageTurn()
+  }
+
+  /**
+   * Whether pages should turn like the leaves of a book. Unless the user has chosen
+   * otherwise, this is on for large screens and for foldables that are open, where the
+   * hinge sits at the spine between the two pages.
+   */
+  private fun isBookPageTurnEnabled(): Boolean {
+    val defaultValue =
+      resources.getBoolean(R.bool.use_book_page_turn_by_default) || isFoldableDeviceOpenAndVertical
+    return quranSettings.isBookPageTurnEnabled(defaultValue)
+  }
+
+  private fun applyBookPageTurn() {
+    val enabled = isBookPageTurnEnabled()
+    // the transformer manages hardware layers per leaf itself, so keep ViewPager from
+    // additionally promoting each whole page to a layer while scrolling.
+    viewPager.setPageTransformer(
+      false,
+      if (enabled) bookPageTransformer else null,
+      View.LAYER_TYPE_NONE
+    )
+    bookSpine?.visibility = if (enabled && isDualPageVisible) View.VISIBLE else View.GONE
   }
 
   private fun initialize(savedInstanceState: Bundle?) {
@@ -507,6 +536,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
     viewPager = nonRestoringViewPager
     viewPager.setAdapter(pagerAdapter)
+    bookSpine = findViewById(R.id.book_spine)
+    applyBookPageTurn()
 
     ayahToolBar.setOnItemSelectedListener(AyahMenuItemSelectionHandler())
     val onPageChangeListener: OnPageChangeListener = object : OnPageChangeListener {
@@ -893,6 +924,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   public override fun onResume() {
     super.onResume()
 
+    applyBookPageTurn()
     audioPresenter.bind(this)
     recentPagePresenter.bind(currentPageFlow)
     readingBookmarkPresenter.bind(currentPageFlow, this)
@@ -1261,6 +1293,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     pagerAdapter.setQuranMode()
     showingTranslation = false
     onShowingTranslationBackCallback.isEnabled = false
+    applyBookPageTurn()
     if (shouldUpdatePageNumber()) {
       val position = quranInfo.getPositionFromPage(page, true)
       viewPager.currentItem = position
@@ -1282,6 +1315,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       pagerAdapter.setTranslationMode()
       showingTranslation = true
       onShowingTranslationBackCallback.isEnabled = true
+      applyBookPageTurn()
       if (shouldUpdatePageNumber()) {
         val position = quranInfo.getPositionFromPage(page, false)
         viewPager.currentItem = position

@@ -119,8 +119,12 @@ public class QuranUtils {
               Configuration.ORIENTATION_LANDSCAPE) || isValidFoldableDeviceAndOpen) {
         final SharedPreferences prefs =
             PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(Constants.PREF_DUAL_PAGE_ENABLED,
-            resources.getBoolean(R.bool.use_tablet_interface_by_default));
+        // an open foldable is a book shaped screen, so show two pages on it unless the user
+        // has explicitly chosen otherwise.
+        final boolean defaultValue =
+            resources.getBoolean(R.bool.use_tablet_interface_by_default) ||
+                isValidFoldableDeviceAndOpen;
+        return prefs.getBoolean(Constants.PREF_DUAL_PAGE_ENABLED, defaultValue);
       }
     }
     return false;

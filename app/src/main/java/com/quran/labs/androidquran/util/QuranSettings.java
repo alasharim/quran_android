@@ -170,6 +170,16 @@ public class QuranSettings {
     return prefs.getString(Constants.PREF_PAGE_TYPE, null);
   }
 
+  /**
+   * Whether pages should turn with a book style animation instead of sliding.
+   *
+   * @param defaultValue the value to use when the user hasn't chosen one - callers pass a
+   *                     device aware default so that unfolded foldables get the book animation.
+   */
+  public boolean isBookPageTurnEnabled(boolean defaultValue) {
+    return prefs.getBoolean(Constants.PREF_BOOK_PAGE_TURN, defaultValue);
+  }
+
   // only available for Naskh, should return false by default for non-Naskh pages
   public boolean isSidelines() {
     return prefs.getBoolean(Constants.PREF_SHOW_SIDELINES, false);

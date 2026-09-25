@@ -146,6 +146,15 @@
         app:iconSpaceReserved="false" />
 
     <CheckBoxPreference
+        android:defaultValue="@bool/use_book_page_turn_by_default"
+        android:key="@string/prefs_book_page_turn"
+        android:persistent="true"
+        android:summaryOff="@string/prefs_book_page_turn_disabled"
+        android:summaryOn="@string/prefs_book_page_turn_enabled"
+        android:title="@string/prefs_book_page_turn_title"
+        app:iconSpaceReserved="false" />
+
+    <CheckBoxPreference
         android:defaultValue="false"
         android:dependency="@string/prefs_dual_page_enabled"
         android:key="@string/prefs_split_page_and_translation"

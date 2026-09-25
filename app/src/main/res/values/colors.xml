@@ -82,4 +82,5 @@
   <color name="text_primary">#ff212121</color>
   <color name="disabled_color">#ffbdbdbd</color>
   <color name="text_hint_color">#ff9e9e9e</color>
+  <color name="book_spine_shadow">#33000000</color>
 </resources>

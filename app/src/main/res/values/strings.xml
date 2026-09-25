@@ -217,6 +217,9 @@
   <string name="prefs_dual_page_mode_title">Dual Page Mode</string>
   <string name="prefs_dual_page_mode_enabled">In landscape, two pages will appear side by side.</string>
   <string name="prefs_dual_page_mode_disabled">In landscape, only one page will appear.</string>
+  <string name="prefs_book_page_turn_title">Book page turn</string>
+  <string name="prefs_book_page_turn_enabled">Pages turn over like the leaves of a book. Best with two pages side by side on a tablet or an unfolded foldable.</string>
+  <string name="prefs_book_page_turn_disabled">Pages slide when swiping.</string>
   <string name="prefs_category_advanced">Advanced Options</string>
   <string name="prefs_category_advanced_summary">Import/export bookmarks, set Quran data directory, etc.</string>
   <string name="prefs_import_title">Import</string>

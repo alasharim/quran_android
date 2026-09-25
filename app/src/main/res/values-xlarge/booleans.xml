@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <resources>
    <bool name="use_tablet_interface_by_default">true</bool>
+   <bool name="use_book_page_turn_by_default">true</bool>
 </resources>

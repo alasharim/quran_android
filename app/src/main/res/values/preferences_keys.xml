@@ -10,6 +10,7 @@
   <string translatable="false" name="prefs_app_theme">appTheme</string>
   <string translatable="false" name="prefs_new_background">useNewBackground</string>
   <string translatable="false" name="prefs_dual_page_enabled">useDualPageMode</string>
+  <string translatable="false" name="prefs_book_page_turn">bookPageTurn</string>
   <string translatable="false" name="prefs_night_mode">nightMode</string>
   <string translatable="false" name="prefs_sura_translated_name">suraTranslatedName</string>
   <string translatable="false" name="prefs_night_mode_text_brightness">nightModeTextBrightness</string>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A soft shadow drawn down the middle of a two page spread to suggest the spine of a book. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+  <gradient
+      android:angle="0"
+      android:startColor="@android:color/transparent"
+      android:centerColor="@color/book_spine_shadow"
+      android:endColor="@android:color/transparent"
+      android:type="linear" />
+</shape>

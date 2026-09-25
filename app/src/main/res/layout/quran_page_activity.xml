@@ -13,6 +13,17 @@
       android:id="@+id/quran_pager"
       />
 
+  <!-- shadow along the spine between two pages when the book page turn is enabled -->
+  <View
+      android:id="@+id/book_spine"
+      android:layout_width="@dimen/book_spine_width"
+      android:layout_height="match_parent"
+      android:layout_gravity="center_horizontal"
+      android:background="@drawable/book_spine"
+      android:importantForAccessibility="no"
+      android:visibility="gone"
+      />
+
   <com.quran.page.common.toolbar.AyahToolBar
       android:id="@+id/ayah_toolbar"
       android:layout_width="wrap_content"
