@@ -4,6 +4,11 @@ Android Studio is the officially supported IDE for this project, but everything 
 build, install, and run the app is plain Gradle and `adb`, so VS Code works well as an editor
 plus task runner. This guide gets you from a fresh machine to the app running on a device.
 
+## Windows quick start
+
+If you are on Windows, see [WINDOWS_QUICKSTART.md](WINDOWS_QUICKSTART.md) for a copy and paste
+version of this guide.
+
 ## 1. Install a JDK
 
 Gradle in this repo (9.7.1) runs on JDK 17 through 26. JDK 27 is **not** supported yet and fails

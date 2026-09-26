@@ -15,16 +15,27 @@
       "label": "Build debug APK",
       "type": "shell",
       "command": "./gradlew assembleMadaniDebug",
-      "windows": { "command": ".\\gradlew.bat assembleMadaniDebug" },
-      "group": { "kind": "build", "isDefault": true },
-      "problemMatcher": ["$gradle"]
+      "windows": {
+        "command": ".\\gradlew.bat assembleMadaniDebug"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
     },
     {
       "label": "Install on connected device",
       "type": "shell",
       "command": "./gradlew installMadaniDebug",
-      "windows": { "command": ".\\gradlew.bat installMadaniDebug" },
-      "problemMatcher": ["$gradle"]
+      "windows": {
+        "command": ".\\gradlew.bat installMadaniDebug"
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
     },
     {
       "label": "Launch app on device",
@@ -35,36 +46,53 @@
     {
       "label": "Build, install and launch",
       "dependsOrder": "sequence",
-      "dependsOn": ["Install on connected device", "Launch app on device"],
+      "dependsOn": [
+        "Install on connected device",
+        "Launch app on device"
+      ],
       "problemMatcher": []
     },
     {
       "label": "Run unit tests",
       "type": "shell",
       "command": "./gradlew testMadaniDebugUnitTest",
-      "windows": { "command": ".\\gradlew.bat testMadaniDebugUnitTest" },
-      "group": { "kind": "test", "isDefault": true },
-      "problemMatcher": ["$gradle"]
+      "windows": {
+        "command": ".\\gradlew.bat testMadaniDebugUnitTest"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
     },
     {
       "label": "Run page turn tests only",
       "type": "shell",
       "command": "./gradlew :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest'",
-      "windows": { "command": ".\\gradlew.bat :app:testMadaniDebugUnitTest --tests \"com.quran.labs.androidquran.ui.helpers.BookTurnStateTest\"" },
-      "problemMatcher": ["$gradle"]
+      "windows": {
+        "command": ".\\gradlew.bat :app:testMadaniDebugUnitTest --tests \"com.quran.labs.androidquran.ui.helpers.BookTurnStateTest\""
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
     },
     {
       "label": "Lint",
       "type": "shell",
       "command": "./gradlew lintMadaniDebug",
-      "windows": { "command": ".\\gradlew.bat lintMadaniDebug" },
-      "problemMatcher": ["$gradle"]
+      "windows": {
+        "command": ".\\gradlew.bat lintMadaniDebug"
+      },
+      "problemMatcher": [
+        "$gradle"
+      ]
     },
     {
       "label": "Show app logs (logcat)",
       "type": "shell",
       "command": "adb logcat --pid=$(adb shell pidof -s com.quran.labs.androidquran.debug)",
-      "windows": { "command": "adb logcat -s Timber QuranAndroid AndroidRuntime" },
       "isBackground": true,
       "problemMatcher": []
     },
