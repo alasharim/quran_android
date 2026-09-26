@@ -7,18 +7,18 @@ Copy and paste steps to go from a Windows PC to the app running on a phone. Run 
 
 | What | Where | Why |
 | --- | --- | --- |
-| The code | `M:\dev\quran_android` | Lots of free space and a short path. Long paths break Windows builds. |
-| Gradle's download cache | `M:\dev\gradle-home` | It grows to 10 GB or more. This keeps it off the C drive. |
+| The code | `X:\dev\quran_android` | X is an NVMe SSD with plenty of free space, and the path is short. Long paths break Windows builds. |
+| Gradle's download cache | `X:\dev\gradle-home` | It grows to 10 GB or more. This keeps it off the nearly full C drive. |
 | Android SDK | leave it at `%LOCALAPPDATA%\Android\Sdk` | It is already installed there. |
 
-If your M drive is a spinning hard disk and another drive is an SSD, builds are much faster on
-the SSD. Check with:
+Avoid spinning hard disks such as the M and G drives. Builds run several times slower on them.
+To see which drives are SSDs, run:
 
 ```powershell
 Get-PhysicalDisk | Select-Object FriendlyName, MediaType, Size
 ```
 
-If you pick a different drive, replace `M:` with that letter everywhere below.
+If you pick a different drive, replace `X:` with that letter everywhere below.
 
 ## 1. Install Git, VS Code and JDK 21
 
@@ -41,7 +41,7 @@ Paste this whole block at once:
 $jdk = (Get-ChildItem "C:\Program Files\Eclipse Adoptium" -Directory | Where-Object Name -like "jdk-21*" | Select-Object -First 1).FullName
 [Environment]::SetEnvironmentVariable("JAVA_HOME", $jdk, "User")
 [Environment]::SetEnvironmentVariable("ANDROID_HOME", "$env:LOCALAPPDATA\Android\Sdk", "User")
-[Environment]::SetEnvironmentVariable("GRADLE_USER_HOME", "M:\dev\gradle-home", "User")
+[Environment]::SetEnvironmentVariable("GRADLE_USER_HOME", "X:\dev\gradle-home", "User")
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($userPath -notlike "*platform-tools*") {
   [Environment]::SetEnvironmentVariable("Path", "$userPath;$env:LOCALAPPDATA\Android\Sdk\platform-tools", "User")
@@ -90,8 +90,8 @@ adb version
 
 ```powershell
 git config --global core.longpaths true
-New-Item -ItemType Directory -Force M:\dev | Out-Null
-cd M:\dev
+New-Item -ItemType Directory -Force X:\dev | Out-Null
+cd X:\dev
 git clone -b claude/code-review-7yxzd0 https://github.com/alasharim/quran_android.git
 cd quran_android
 ```
@@ -137,7 +137,7 @@ side and swipe to turn them.
 
 ## Optional: faster builds
 
-Bitdefender scans every file Gradle writes, which slows builds a lot. Adding `M:\dev` to
+Bitdefender scans every file Gradle writes, which slows builds a lot. Adding `X:\dev` to
 Bitdefender's exclusions list makes builds noticeably faster.
 
 ## When something goes wrong
