@@ -16,32 +16,31 @@
       "type": "shell",
       "command": "./gradlew assembleMadaniDebug",
       "windows": {
-        "command": ".\\gradlew.bat assembleMadaniDebug"
+        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat assembleMadaniDebug"
       },
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": [
-        "$gradle"
-      ]
+      "problemMatcher": []
     },
     {
       "label": "Install on connected device",
       "type": "shell",
       "command": "./gradlew installMadaniDebug",
       "windows": {
-        "command": ".\\gradlew.bat installMadaniDebug"
+        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat installMadaniDebug"
       },
-      "problemMatcher": [
-        "$gradle"
-      ]
+      "problemMatcher": []
     },
     {
       "label": "Launch app on device",
       "type": "shell",
       "command": "adb shell am start -n com.quran.labs.androidquran.debug/com.quran.labs.androidquran.QuranDataActivity",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "windows": {
+        "command": ". ./tools/vscode/refresh-env.ps1; adb shell am start -n com.quran.labs.androidquran.debug/com.quran.labs.androidquran.QuranDataActivity"
+      }
     },
     {
       "label": "Build, install and launch",
@@ -57,50 +56,63 @@
       "type": "shell",
       "command": "./gradlew testMadaniDebugUnitTest",
       "windows": {
-        "command": ".\\gradlew.bat testMadaniDebugUnitTest"
+        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat testMadaniDebugUnitTest"
       },
       "group": {
         "kind": "test",
         "isDefault": true
       },
-      "problemMatcher": [
-        "$gradle"
-      ]
+      "problemMatcher": []
     },
     {
       "label": "Run page turn tests only",
       "type": "shell",
       "command": "./gradlew :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest'",
       "windows": {
-        "command": ".\\gradlew.bat :app:testMadaniDebugUnitTest --tests \"com.quran.labs.androidquran.ui.helpers.BookTurnStateTest\""
+        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest'"
       },
-      "problemMatcher": [
-        "$gradle"
-      ]
+      "problemMatcher": []
     },
     {
       "label": "Lint",
       "type": "shell",
       "command": "./gradlew lintMadaniDebug",
       "windows": {
-        "command": ".\\gradlew.bat lintMadaniDebug"
+        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat lintMadaniDebug"
       },
-      "problemMatcher": [
-        "$gradle"
-      ]
+      "problemMatcher": []
     },
     {
       "label": "Show app logs (logcat)",
       "type": "shell",
       "command": "adb logcat --pid=$(adb shell pidof -s com.quran.labs.androidquran.debug)",
       "isBackground": true,
-      "problemMatcher": []
+      "problemMatcher": [],
+      "windows": {
+        "command": ". ./tools/vscode/refresh-env.ps1; adb logcat --pid=$(adb shell pidof -s com.quran.labs.androidquran.debug)"
+      }
     },
     {
       "label": "List connected devices",
       "type": "shell",
       "command": "adb devices -l",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "windows": {
+        "command": ". ./tools/vscode/refresh-env.ps1; adb devices -l"
+      }
     }
-  ]
+  ],
+  "windows": {
+    "options": {
+      "shell": {
+        "executable": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command"
+        ]
+      }
+    }
+  }
 }
