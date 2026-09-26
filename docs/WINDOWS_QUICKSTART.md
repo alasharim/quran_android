@@ -69,7 +69,7 @@ Test-Path "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat"
 **If it prints True**, run these two lines and answer `y` to every licence question:
 
 ```powershell
-& "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat" "platforms;android-37" "platform-tools"
+& "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat" "platforms;android-37.0" "platform-tools"
 & "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat" --licenses
 ```
 

@@ -40,7 +40,7 @@ https://developer.android.com/studio#command-line-tools-only and unpack it so th
 Then install what the build needs and accept the licenses:
 
 ```
-sdkmanager "platform-tools" "platforms;android-37"
+sdkmanager "platform-tools" "platforms;android-37.0"
 sdkmanager --licenses
 ```
 
