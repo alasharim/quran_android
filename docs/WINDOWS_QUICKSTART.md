@@ -92,7 +92,7 @@ adb version
 git config --global core.longpaths true
 New-Item -ItemType Directory -Force X:\dev | Out-Null
 cd X:\dev
-git clone -b claude/code-review-7yxzd0 https://github.com/alasharim/quran_android.git
+git clone https://github.com/alasharim/quran_android.git
 cd quran_android
 ```
 
