@@ -1,7 +1,10 @@
 package com.quran.labs.androidquran.ui.helpers
 
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.viewpager.widget.ViewPager
+import com.quran.labs.androidquran.view.PageCurlView
 import com.quran.labs.androidquran.view.TabletView
 import kotlin.math.min
 
@@ -10,27 +13,63 @@ import kotlin.math.min
  * sliding them.
  *
  * While the pager scrolls there is a page on the left (position in (-1, 0)) and a page on the
- * right (position in (0, 1)). Both are pinned in place and stacked, and the transition is drawn
- * as one leaf being turned over around the spine:
- *
- * - In the first half of the turn the left page sits on top and its right leaf lifts up around
- *   the spine, revealing the right page's right leaf underneath.
- * - In the second half the right page sits on top and its left leaf comes down around the
- *   spine, covering the left page's left leaf.
+ * right (position in (0, 1)). Both are pinned in place, and the transition is drawn as one leaf
+ * being turned over around the spine: the right leaf of the left page lifts, turns over, and
+ * comes down as the left leaf of the right page.
  *
  * In dual page mode the spine is the centre of the [TabletView], which is also where the hinge
  * of an unfolded foldable sits. In single page mode the whole page is one leaf hinged on its
- * left edge and it lifts away to reveal the incoming page.
+ * left edge.
  *
- * The geometry is computed by [bookTurnStateFor] so that it can be unit tested without views.
+ * With a [curlView], the turning leaf is hidden in the pager and drawn there as paper that
+ * curls over, following the finger that is turning it (see [pageCurlFor]). Without one, or if
+ * the leaf can't be captured, the leaf is turned as a flat card around the spine instead, with
+ * the geometry from [bookTurnStateFor].
  */
 class BookPageTransformer : ViewPager.PageTransformer {
+
+  /** Draws the turning leaf as curling paper, or null to turn it as a flat card. */
+  internal var curlView: PageCurlView? = null
+    set(value) {
+      field?.clear()
+      field = value
+    }
+
+  private val touchTracker = PageCurlTouchTracker()
+
+  /** The page whose leaf is being turned, while a turn is in progress. */
+  private var turningPage: View? = null
+
+  /** Set when the leaf couldn't be captured, so this turn falls back to the flat card. */
+  private var curlFailed = false
+
+  private var lastTravel = Float.NaN
+  private var lastFrameTime = 0L
+  private var speed = 0f
+
+  /** Lets the curl follow the finger; pass it every touch event that reaches the pager. */
+  fun onTouchEvent(event: MotionEvent) {
+    touchTracker.onTouchEvent(event)
+  }
 
   override fun transformPage(page: View, position: Float) {
     val width = page.width
     if (width == 0) return
 
     val state = bookTurnStateFor(position)
+    if (state == null) {
+      if (page === turningPage) {
+        endTurn()
+      }
+      resetAll(page)
+      return
+    }
+
+    val curl = curlView
+    if (curl != null && !curlFailed && applyCurl(curl, page, state, position, width)) {
+      return
+    }
+
     if (page is TabletView) {
       applyToSpread(page, state, width)
     } else {
@@ -38,19 +77,103 @@ class BookPageTransformer : ViewPager.PageTransformer {
     }
   }
 
-  private fun applyToSpread(page: TabletView, state: BookTurnState?, width: Int) {
-    val leftLeaf: View? = page.leftPage
-    val rightLeaf: View? = page.rightPage
-    if (leftLeaf == null || rightLeaf == null) {
-      return
+  /**
+   * Hides the turning leaves of [page] and hands them to [curl]. Returns false if the curl
+   * can't be drawn, in which case the leaf should be turned as a flat card.
+   */
+  private fun applyCurl(
+    curl: PageCurlView,
+    page: View,
+    state: BookTurnState,
+    position: Float,
+    width: Int
+  ): Boolean {
+    val spread = page as? TabletView
+    val leftLeaf: View? = spread?.leftPage
+    val rightLeaf: View? = spread?.rightPage
+    if (spread != null && (leftLeaf == null || rightLeaf == null)) {
+      return false
     }
 
-    if (state == null) {
-      resetPage(page)
-      resetLeaf(leftLeaf)
-      resetLeaf(rightLeaf)
-      return
+    page.translationX = state.translationFraction * width
+    page.translationZ = 0f
+
+    if (!state.isLeftPage) {
+      // the page being uncovered: its left leaf is the back of the turning leaf
+      if (leftLeaf != null && rightLeaf != null) {
+        resetLeaf(rightLeaf)
+        hideLeaf(leftLeaf)
+        curl.setBack(leftLeaf)
+      } else {
+        resetLeaf(page)
+        curl.setBack(null)
+      }
+      return true
     }
+
+    // the page being turned away: its right leaf (or the whole page) is the turning leaf
+    val leaf = rightLeaf ?: page
+    val progress = -position
+    if (turningPage !== page) {
+      turningPage = page
+      lastTravel = Float.NaN
+      speed = 0f
+    }
+
+    val singlePage = spread == null
+    updateSpeed(pageCurlTravel(progress, singlePage))
+    touchTracker.step()
+    val downY = touchTracker.downY
+    val shape = pageCurlFor(
+      leafWidth = leaf.width.toFloat(),
+      leafHeight = leaf.height.toFloat(),
+      progress = progress,
+      singlePage = singlePage,
+      // without a finger, turn the page by its bottom corner
+      grabV = if (downY.isNaN()) leaf.height.toFloat() else downY - leaf.top,
+      fingerOffsetV = touchTracker.offsetY,
+      speed = speed
+    )
+
+    val spineX = if (rightLeaf != null) rightLeaf.left.toFloat() else 0f
+    if (!curl.setFront(page, leaf, spineX, shape, progress)) {
+      curlFailed = true
+      return false
+    }
+
+    if (leftLeaf != null) {
+      resetLeaf(leftLeaf)
+    }
+    hideLeaf(leaf)
+    return true
+  }
+
+  /** Tracks how fast the edge of the leaf is moving, in leaf widths per second. */
+  private fun updateSpeed(travel: Float) {
+    val now = AnimationUtils.currentAnimationTimeMillis()
+    val elapsed = now - lastFrameTime
+    if (!lastTravel.isNaN() && elapsed > 0) {
+      val instant = (travel - lastTravel) * 1000f / elapsed
+      speed += (instant - speed) * SPEED_SMOOTHING
+    }
+    if (elapsed > 0 || lastTravel.isNaN()) {
+      lastTravel = travel
+      lastFrameTime = now
+    }
+  }
+
+  private fun endTurn() {
+    turningPage = null
+    curlFailed = false
+    lastTravel = Float.NaN
+    speed = 0f
+    touchTracker.reset()
+    curlView?.clear()
+  }
+
+  private fun applyToSpread(page: TabletView, state: BookTurnState, width: Int) {
+    val leftLeaf: View = page.leftPage ?: return
+    val rightLeaf: View = page.rightPage ?: return
 
     page.translationX = state.translationFraction * width
     page.translationZ = if (state.onTop) ON_TOP_Z else 0f
@@ -60,13 +183,7 @@ class BookPageTransformer : ViewPager.PageTransformer {
     turnLeaf(rightLeaf, state.rightLeafAngle, state.rightLeafHidden, hingeOnLeftEdge = true)
   }
 
-  private fun applyToSinglePage(page: View, state: BookTurnState?, width: Int) {
-    if (state == null) {
-      resetPage(page)
-      resetLeaf(page)
-      return
-    }
-
+  private fun applyToSinglePage(page: View, state: BookTurnState, width: Int) {
     page.translationX = state.translationFraction * width
     page.translationZ = if (state.isLeftPage) ON_TOP_Z else 0f
     turnLeaf(page, state.singleLeafAngle, hidden = false, hingeOnLeftEdge = true)
@@ -85,14 +202,27 @@ class BookPageTransformer : ViewPager.PageTransformer {
     setLayerType(leaf, if (turning) View.LAYER_TYPE_HARDWARE else View.LAYER_TYPE_NONE)
   }
 
-  private fun resetPage(page: View) {
+  private fun resetAll(page: View) {
     page.translationX = 0f
     page.translationZ = 0f
+    if (page is TabletView) {
+      page.leftPage?.let { resetLeaf(it) }
+      page.rightPage?.let { resetLeaf(it) }
+    }
+    // in single page mode the page is the leaf; in dual page mode this is a no-op
+    resetLeaf(page)
   }
 
   private fun resetLeaf(leaf: View) {
     leaf.rotationY = 0f
     leaf.alpha = 1f
+    setLayerType(leaf, View.LAYER_TYPE_NONE)
+  }
+
+  /** Hides a leaf that is being drawn by the curl view instead. */
+  private fun hideLeaf(leaf: View) {
+    leaf.rotationY = 0f
+    leaf.alpha = 0f
     setLayerType(leaf, View.LAYER_TYPE_NONE)
   }
 
@@ -105,6 +235,7 @@ class BookPageTransformer : ViewPager.PageTransformer {
   companion object {
     private const val ON_TOP_Z = 1f
     private const val CAMERA_DISTANCE_DP = 10_000f
+    private const val SPEED_SMOOTHING = 0.3f
   }
 }
 

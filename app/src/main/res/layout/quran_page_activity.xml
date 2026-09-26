@@ -24,6 +24,14 @@
       android:visibility="gone"
       />
 
+  <!-- draws the leaf being turned as curling paper when the book page turn is enabled -->
+  <com.quran.labs.androidquran.view.PageCurlView
+      android:id="@+id/page_curl"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone"
+      />
+
   <com.quran.page.common.toolbar.AyahToolBar
       android:id="@+id/ayah_toolbar"
       android:layout_width="wrap_content"
