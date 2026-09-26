@@ -1,0 +1,23 @@
+{
+  "files.exclude": {
+    "**/build": true,
+    "**/.gradle": true,
+    "**/.kotlin": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/.gradle": true,
+    "**/.kotlin": true
+  },
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.import.gradle.wrapper.enabled": true,
+  "gradle.nestedProjects": false,
+  "[kotlin]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[java]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
+}
