@@ -29,7 +29,7 @@ winget install --id EclipseAdoptium.Temurin.21.JDK -e
 ```
 
 Skip any line for something already installed. JDK 17 may work too, but 21 matches what the
-build is tested with more closely. JDK 27 does not work yet.
+build is tested with more closely. Anything newer than JDK 27 does not work yet.
 
 **Close PowerShell and open a new window** so the new programs are found.
 
@@ -146,6 +146,6 @@ Bitdefender's exclusions list makes builds noticeably faster.
 | --- | --- |
 | `SDK location not found` | Step 2 did not stick. Open a new PowerShell window and check `$env:ANDROID_HOME`. |
 | `failed to find target with hash string 'android-37'` | Step 3 was skipped. |
-| `Unsupported class file major version` | Gradle is using JDK 27. Check `$env:JAVA_HOME`. |
+| `Unsupported class file major version` | Gradle is using a JDK newer than 27. Check `$env:JAVA_HOME`. |
 | `adb` is not recognized | Platform tools are missing or PowerShell was not reopened after step 2. |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | Run `adb uninstall com.quran.labs.androidquran.debug` and try again. |

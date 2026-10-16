@@ -11,8 +11,8 @@ version of this guide.
 
 ## 1. Install a JDK
 
-Gradle in this repo (9.7.1) runs on JDK 17 through 26. JDK 27 is **not** supported yet and fails
-with `Unsupported class file major version 71`. Continuous integration uses JDK 26; a JDK 21
+Gradle in this repo (9.8.1) runs on JDK 17 through 27. Newer JDKs are **not** supported yet and
+fail with `Unsupported class file major version`. Continuous integration uses JDK 27; a JDK 21
 LTS build (for example Eclipse Temurin) is the safest choice.
 
 Check with:
@@ -123,7 +123,7 @@ On the first launch the app downloads the page images. After that:
 ## Troubleshooting
 
 - `SDK location not found`: `ANDROID_HOME` or `local.properties` is missing or wrong.
-- `Unsupported class file major version`: Gradle is running on a JDK newer than 26.
+- `Unsupported class file major version`: Gradle is running on a JDK newer than 27.
 - `INSTALL_FAILED_UPDATE_INCOMPATIBLE`: an older debug build signed with a different key is
   installed. Run `adb uninstall com.quran.labs.androidquran.debug` and install again.
 - Build runs out of memory: raise `-Xmx4G` in `gradle.properties` or close other Gradle daemons
