@@ -67,9 +67,9 @@
     {
       "label": "Run page turn tests only",
       "type": "shell",
-      "command": "./gradlew :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest'",
+      "command": "./gradlew :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest' --tests 'com.quran.labs.androidquran.ui.helpers.PageCurlTest'",
       "windows": {
-        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest'"
+        "command": ". ./tools/vscode/refresh-env.ps1; ./gradlew.bat :app:testMadaniDebugUnitTest --tests 'com.quran.labs.androidquran.ui.helpers.BookTurnStateTest' --tests 'com.quran.labs.androidquran.ui.helpers.PageCurlTest'"
       },
       "problemMatcher": []
     },

@@ -5,6 +5,9 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 /**
  * NonRestoringViewPager is a hack to sometimes prevent ViewPager from restoring its
  * page in onRestoreInstanceState. This is done because in some cases, the ViewPager
@@ -27,6 +30,12 @@ import android.view.MotionEvent;
 public class NonRestoringViewPager extends ViewPager {
   private boolean isRestoring = false;
   private boolean useDefaultImplementation;
+  @Nullable private TouchObserver touchObserver;
+
+  /** Sees every touch event that reaches the pager, before the pager handles it. */
+  public interface TouchObserver {
+    void onTouchEvent(@NonNull MotionEvent event);
+  }
 
   public NonRestoringViewPager(Context context) {
     super(context);
@@ -34,6 +43,18 @@ public class NonRestoringViewPager extends ViewPager {
 
   public NonRestoringViewPager(Context context, AttributeSet attrs) {
     super(context, attrs);
+  }
+
+  public void setTouchObserver(@Nullable TouchObserver touchObserver) {
+    this.touchObserver = touchObserver;
+  }
+
+  @Override
+  public boolean dispatchTouchEvent(MotionEvent ev) {
+    if (touchObserver != null) {
+      touchObserver.onTouchEvent(ev);
+    }
+    return super.dispatchTouchEvent(ev);
   }
 
   public void setIsDualPagesInLandscape(boolean isDualPagesInLandscape) {

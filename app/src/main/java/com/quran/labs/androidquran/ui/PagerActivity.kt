@@ -119,6 +119,7 @@ import com.quran.labs.androidquran.util.QuranSettings
 import com.quran.labs.androidquran.util.QuranUtils
 import com.quran.labs.androidquran.util.ShareUtil
 import com.quran.labs.androidquran.view.IconPageIndicator
+import com.quran.labs.androidquran.view.PageCurlView
 import com.quran.labs.androidquran.view.QuranSpinner
 import com.quran.labs.androidquran.view.SlidingUpPanelLayout
 import com.quran.mobile.common.download.DownloadInfoStreams
@@ -196,6 +197,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
 
   private val bookPageTransformer = BookPageTransformer()
   private var bookSpine: View? = null
+  private var pageCurlView: PageCurlView? = null
 
   private var bookmarksMenuItem: MenuItem? = null
   private var isCurrentPageReadingBookmarked = false
@@ -409,6 +411,12 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       View.LAYER_TYPE_NONE
     )
     bookSpine?.visibility = if (enabled && isDualPageVisible) View.VISIBLE else View.GONE
+    pageCurlView?.let { curl ->
+      if (!enabled) {
+        curl.release()
+      }
+      curl.visibility = if (enabled) View.VISIBLE else View.GONE
+    }
   }
 
   private fun initialize(savedInstanceState: Bundle?) {
@@ -537,6 +545,10 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     viewPager = nonRestoringViewPager
     viewPager.setAdapter(pagerAdapter)
     bookSpine = findViewById(R.id.book_spine)
+    val curlView = findViewById<PageCurlView>(R.id.page_curl)
+    pageCurlView = curlView
+    bookPageTransformer.curlView = curlView
+    nonRestoringViewPager.setTouchObserver { event -> bookPageTransformer.onTouchEvent(event) }
     applyBookPageTurn()
 
     ayahToolBar.setOnItemSelectedListener(AyahMenuItemSelectionHandler())
