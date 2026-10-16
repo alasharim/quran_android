@@ -24,10 +24,6 @@ object Constants {
   const val NO_PAGE = -1
   const val MAX_RECENT_PAGES = 3
 
-  // quranapp
-  const val QURAN_APP_BASE = "http://quranapp.com/"
-  const val QURAN_APP_ENDPOINT = "http://quranapp.com/note"
-
   // Notification Ids
   const val NOTIFICATION_ID_DOWNLOADING = 1
   const val NOTIFICATION_ID_DOWNLOADING_COMPLETE = 2
@@ -96,6 +92,7 @@ object Constants {
   const val PREF_APP_THEME = "appTheme"
   const val PREF_MOBILE_SYNC_LEGACY_BOOKMARKS_MIGRATED = "mobileSyncLegacyBookmarksMigrated"
   const val PREF_HAS_SEEN_MOVABLE_BOOKMARK_EDUCATION = "hasSeenMovableBookmarkEducation"
+  const val PREF_LAST_SEEN_ANNOUNCEMENT = "lastSeenAnnouncement"
 
   // Themes
   const val THEME_LIGHT = "light"

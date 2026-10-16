@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.quran.data.core.QuranInfo
+import com.quran.data.core.SuggestedReadingBookmark
 import com.quran.data.dao.BookmarksDao
 import com.quran.data.dao.HighlightsDao
 import com.quran.data.dao.ReadingBookmarksDao
@@ -19,12 +20,14 @@ import com.quran.data.model.bookmark.PageReadingBookmark
 import com.quran.data.model.bookmark.ReadingBookmark
 import com.quran.data.model.bookmark.ReadingBookmarkTarget
 import com.quran.data.model.bookmark.ReadingBookmarkType
+import com.quran.data.model.collection.CollectionNameException
 import com.quran.data.model.highlight.Highlight
 import com.quran.mobile.feature.ayahbookmark.R
 import com.quran.mobile.feature.ayahbookmark.readingbookmark.ReadingBookmarkAction
 import com.quran.mobile.feature.ayahbookmark.readingbookmark.presenter.ReadingBookmarkSheetPresenter
 import com.quran.mobile.feature.ayahbookmark.state.AyahBookmarkCollectionCreationState
 import com.quran.mobile.feature.ayahbookmark.state.AyahBookmarkCollectionItem
+import com.quran.mobile.feature.ayahbookmark.state.AyahBookmarkCollectionNameError
 import com.quran.mobile.feature.ayahbookmark.state.AyahBookmarkEvent
 import com.quran.mobile.feature.ayahbookmark.state.AyahBookmarkState
 import com.quran.page.common.data.QuranNaming
@@ -44,6 +47,7 @@ class AyahBookmarkPresenter(
   private val bookmarksDao: BookmarksDao,
   private val highlightsDao: HighlightsDao,
   private val readingBookmarksDao: ReadingBookmarksDao,
+  private val suggestedReadingBookmark: SuggestedReadingBookmark,
   private val quranNaming: QuranNaming,
   private val quranInfo: QuranInfo,
   private val readingBookmarkSheetPresenterFactory: ReadingBookmarkSheetPresenter.Factory,
@@ -71,18 +75,10 @@ class AyahBookmarkPresenter(
         .filter { it.asSuraAyah() == currentAyah }
     }
 
-    val suggestedReadingBookmark = remember(ayahReadingBookmarks, readingBookmarks.value) {
-      if (ayahReadingBookmarks.isEmpty()) {
-        // TODO: we need to have a data source for this - the priority should be:
-        // sessionLaunchedReadingBookmark ?: readingBookmarksBeforeThisAyah.takeFurthestWithin25PagesOfCurrent()
-        //    ?: readingBookmarksBeforeThisAyah.takeFirst() ?: takeLastUpdated
-        readingBookmarks.value.orEmpty()
-          .filterNot { it is EmptyReadingBookmark }
-          .maxByOrNull { it.timestamp }
-          ?: EmptyReadingBookmark(ReadingBookmarkType.PURPLE, Clock.System.now())
-      } else {
-        ayahReadingBookmarks.first()
-      }
+    val suggestedType = suggestedReadingBookmark.bookmarkType.collectAsState()
+    val suggestedReadingBookmark = remember(suggestedType.value, readingBookmarks.value) {
+      readingBookmarks.value.orEmpty().firstOrNull { it.slot == suggestedType.value }
+        ?: EmptyReadingBookmark(suggestedType.value, Instant.DISTANT_PAST)
     }
 
     val otherReadingBookmarks = remember(readingBookmarks.value, suggestedReadingBookmark.slot) {
@@ -185,7 +181,7 @@ class AyahBookmarkPresenter(
         is AyahBookmarkEvent.CollectionNameChanged -> {
           val current = collectionCreationState.value
           if (current is AyahBookmarkCollectionCreationState.Active) {
-            collectionCreationState.value = current.copy(name = event.name, hasNameError = false)
+            collectionCreationState.value = current.copy(name = event.name, nameError = null)
           }
         }
 
@@ -199,10 +195,15 @@ class AyahBookmarkPresenter(
               collectionCreationState.value = AyahBookmarkCollectionCreationState.Inactive
             } catch (exception: CancellationException) {
               throw exception
+            } catch (exception: CollectionNameException) {
+              collectionCreationState.value = AyahBookmarkCollectionCreationState.Active(
+                name = event.name,
+                nameError = exception.asNameError()
+              )
             } catch (_: IllegalArgumentException) {
               collectionCreationState.value = AyahBookmarkCollectionCreationState.Active(
                 name = event.name,
-                hasNameError = true
+                nameError = AyahBookmarkCollectionNameError.Unavailable
               )
             }
           }
@@ -274,6 +275,16 @@ class AyahBookmarkPresenter(
         quranInfo.getPageFromSuraAyah(bookmark.sura, bookmark.ayah)
       )
       is EmptyReadingBookmark -> ""
+    }
+  }
+
+  private fun CollectionNameException.asNameError(): AyahBookmarkCollectionNameError {
+    return when (this) {
+      is CollectionNameException.Duplicate ->
+        AyahBookmarkCollectionNameError.Duplicate(existingName)
+      is CollectionNameException.Reserved -> AyahBookmarkCollectionNameError.Reserved(name.trim())
+      is CollectionNameException.TooShort -> AyahBookmarkCollectionNameError.Empty
+      is CollectionNameException.TooLong -> AyahBookmarkCollectionNameError.TooLong
     }
   }
 
