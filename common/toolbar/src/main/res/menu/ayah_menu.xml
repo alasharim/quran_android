@@ -21,6 +21,11 @@
     <item android:id="@+id/cab_translate_ayah"
           android:icon="@drawable/ic_translation"
           android:title="@string/translation_ayah" />
+    <!-- shown only for ayat that have linked hadiths -->
+    <item android:id="@+id/cab_hadith_ayah"
+          android:visible="false"
+          android:icon="@drawable/ic_hadith"
+          android:title="@string/hadith_ayah" />
     <item android:id="@+id/cab_play_from_here"
           android:icon="@drawable/ic_play"
           android:title="@string/play_from_here" />

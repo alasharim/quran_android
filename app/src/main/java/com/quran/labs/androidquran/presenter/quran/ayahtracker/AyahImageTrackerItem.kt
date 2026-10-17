@@ -155,6 +155,19 @@ open class AyahImageTrackerItem @JvmOverloads constructor(
     } else null
   }
 
+  override fun onSetHadithAyahs(page: Int, ayahs: Set<SuraAyah>) {
+    if (this.page == page) {
+      ayahView.setHadithAyahs(ayahs)
+    }
+  }
+
+  override fun getHadithAyahForPosition(page: Int, x: Float, y: Float): SuraAyah? {
+    return if (this.page == page) {
+      val (pageX, pageY) = ImageAyahUtils.getPageXY(x, y, ayahView) ?: return null
+      ayahView.getHadithAyahAt(pageX, pageY)
+    } else null
+  }
+
   override fun getAyahView(): View {
     return ayahView
   }

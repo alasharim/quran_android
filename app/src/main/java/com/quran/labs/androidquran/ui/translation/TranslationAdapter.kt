@@ -61,6 +61,9 @@ internal class TranslationAdapter(
   private var highlightedStartPosition: Int = 0
   private var highlightType: HighlightType? = null
 
+  private var hadithAyahs: Set<SuraAyah> = emptySet()
+  var onHadithClickListener: ((SuraAyah) -> Unit)? = null
+
   private val expandedTafseerAyahs = mutableSetOf<Pair<Int, Int>>()
   private val expandedHyperlinks = mutableSetOf<Pair<Int, Int>>()
   private val expandedFootnotes = mutableMapOf<QuranAyahInfo, List<Int>>()
@@ -230,8 +233,23 @@ internal class TranslationAdapter(
     }
   }
 
+  fun setHadithAyahs(ayahs: Set<SuraAyah>) {
+    if (hadithAyahs != ayahs) {
+      hadithAyahs = ayahs
+      notifyDataSetChanged()
+    }
+  }
+
   private fun handleClick(view: View) {
     val position = recyclerView.getChildAdapterPosition(view)
+    val hadithClickListener = onHadithClickListener
+    if (view is AyahNumberView && view.isHadithLabelTouched &&
+      hadithClickListener != null && position != RecyclerView.NO_POSITION
+    ) {
+      val ayahInfo = data[position].ayahInfo
+      hadithClickListener(SuraAyah(ayahInfo.sura, ayahInfo.ayah))
+      return
+    }
     if (highlightedAyah != 0 && position != RecyclerView.NO_POSITION) {
       val ayahInfo = data[position].ayahInfo
       if (ayahInfo.ayahId != highlightedAyah && highlightType == HighlightTypes.SELECTION) {
@@ -425,6 +443,10 @@ internal class TranslationAdapter(
         holder.ayahNumber.setAyahString(text)
         holder.ayahNumber.setTextColor(textColor)
         holder.ayahNumber.setNightMode(isNightMode)
+        val hasHadiths = SuraAyah(row.ayahInfo.sura, row.ayahInfo.ayah) in hadithAyahs
+        holder.ayahNumber.setHadithLabel(
+          if (hasHadiths) context.getString(R.string.hadith_indicator_label) else null
+        )
       }
     }
     updateHighlight(row, holder)

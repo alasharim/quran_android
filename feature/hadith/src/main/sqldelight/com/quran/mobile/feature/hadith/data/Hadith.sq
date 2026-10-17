@@ -1,0 +1,27 @@
+-- The database ships as an asset built by tools/hadith/build_hadith_db.py.
+CREATE TABLE IF NOT EXISTS hadith(
+  id INTEGER NOT NULL PRIMARY KEY,
+  collection TEXT NOT NULL,
+  number TEXT NOT NULL,
+  chapter TEXT,
+  text TEXT NOT NULL,
+  grade TEXT NOT NULL
+);
+
+-- An ayah of 0 links the hadith to the whole surah.
+CREATE TABLE IF NOT EXISTS hadith_ayah(
+  hadith_id INTEGER NOT NULL,
+  sura INTEGER NOT NULL,
+  ayah INTEGER NOT NULL,
+  PRIMARY KEY(sura, ayah, hadith_id)
+);
+
+linkedAyahs:
+SELECT DISTINCT sura, ayah FROM hadith_ayah;
+
+hadithsForAyah:
+SELECT hadith.id, hadith.collection, hadith.number, hadith.chapter, hadith.text, hadith.grade,
+       hadith_ayah.ayah
+FROM hadith_ayah JOIN hadith ON hadith.id = hadith_ayah.hadith_id
+WHERE hadith_ayah.sura = :sura AND (hadith_ayah.ayah = :ayah OR hadith_ayah.ayah = 0)
+ORDER BY hadith_ayah.ayah = 0, hadith.id;

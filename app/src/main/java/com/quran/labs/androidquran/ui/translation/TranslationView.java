@@ -21,6 +21,7 @@ import com.quran.labs.androidquran.common.QuranAyahInfo;
 import com.quran.labs.androidquran.common.TranslationMetadata;
 import com.quran.labs.androidquran.data.QuranDisplayData;
 import com.quran.labs.androidquran.QuranApplication;
+import com.quran.labs.androidquran.ui.PagerActivity;
 import com.quran.labs.androidquran.ui.helpers.HighlightTypes;
 import com.quran.labs.androidquran.ui.util.PageController;
 import com.quran.labs.androidquran.util.QuranSettings;
@@ -30,8 +31,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import dev.chrisbanes.insetter.Insetter;
+import kotlin.Unit;
 
 public class TranslationView extends FrameLayout implements View.OnClickListener,
     TranslationAdapter.OnVerseSelectedListener, TranslationAdapter.OnJumpToAyahListener {
@@ -60,6 +63,12 @@ public class TranslationView extends FrameLayout implements View.OnClickListener
     translationRecycler.setLayoutManager(layoutManager);
     translationRecycler.setItemAnimator(new DefaultItemAnimator());
     translationAdapter = new TranslationAdapter(context, translationRecycler, this, this, this);
+    translationAdapter.setOnHadithClickListener(suraAyah -> {
+      if (getContext() instanceof PagerActivity) {
+        ((PagerActivity) getContext()).showHadithSheet(suraAyah);
+      }
+      return Unit.INSTANCE;
+    });
     translationRecycler.setAdapter(translationAdapter);
     addView(translationRecycler, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     translationRecycler.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -113,6 +122,10 @@ public class TranslationView extends FrameLayout implements View.OnClickListener
 
   public void setPageController(PageController controller) {
     this.pageController = controller;
+  }
+
+  public void setHadithAyahs(@NonNull Set<SuraAyah> hadithAyahs) {
+    translationAdapter.setHadithAyahs(hadithAyahs);
   }
 
   public void setVerses(@NonNull QuranDisplayData quranDisplayData,
