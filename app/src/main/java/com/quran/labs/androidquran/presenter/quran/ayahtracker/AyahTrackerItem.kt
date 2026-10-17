@@ -66,6 +66,11 @@ open class AyahTrackerItem internal constructor(val page: Int) {
 
   open fun getGlyphForPosition(page: Int, x: Float, y: Float): AyahGlyph? = null
 
+  open fun onSetHadithAyahs(page: Int, ayahs: Set<SuraAyah>) {}
+
+  /** The ayah whose hadith indicator is at this touch position, if any. */
+  open fun getHadithAyahForPosition(page: Int, x: Float, y: Float): SuraAyah? = null
+
   open fun getQuranAyahInfo(sura: Int, ayah: Int): QuranAyahInfo? = null
 
   open fun getLocalTranslations(): Array<LocalTranslation>? = null

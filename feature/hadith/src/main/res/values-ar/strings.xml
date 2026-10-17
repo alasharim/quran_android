@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="hadith_title">الأحاديث</string>
+  <string name="hadith_close">إغلاق</string>
+  <string name="hadith_none">لا توجد أحاديث مرتبطة بهذه الآية.</string>
+  <string name="hadith_section_ayah">في هذه الآية</string>
+  <string name="hadith_section_sura">في سورة %1$s</string>
+  <string name="hadith_reference">%1$s %2$s</string>
+  <string name="hadith_collection_bukhari">صحيح البخاري</string>
+  <string name="hadith_collection_muslim">صحيح مسلم</string>
+  <string name="hadith_grade_sahih">صحيح</string>
+  <string name="hadith_show_more">عرض المزيد</string>
+  <string name="hadith_show_less">عرض أقل</string>
+  <string name="hadith_copy">نسخ</string>
+  <string name="hadith_read_english">اقرأ بالإنجليزية</string>
+  <string name="hadith_source_note">من كتب التفسير في صحيح البخاري وصحيح مسلم. رُبط كل حديث بالآية التي يفسرها بابه آليًا. تُفتح الترجمة الإنجليزية على موقع sunnah.com.</string>
+</resources>

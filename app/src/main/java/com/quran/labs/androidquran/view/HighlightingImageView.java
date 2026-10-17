@@ -23,10 +23,12 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.DisplayCutoutCompat;
 
+import com.quran.data.model.SuraAyah;
 import com.quran.data.model.highlight.HighlightType;
 import com.quran.labs.androidquran.R;
 import com.quran.labs.androidquran.data.Constants;
@@ -41,6 +43,7 @@ import com.quran.page.common.data.PageCoordinates;
 import com.quran.page.common.draw.ImageDrawHelper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -115,6 +118,15 @@ public class HighlightingImageView extends AppCompatImageView {
       c -> { super.onDraw(c); return null; },
       () -> isNightMode,
       HIGHLIGHT, BACKGROUND
+  );
+
+  private Set<SuraAyah> hadithAyahs = Collections.emptySet();
+
+  // Draws a dot on the ayah numbers of ayat that have linked hadiths
+  private final HadithIndicatorDrawer hadithIndicatorDrawer = new HadithIndicatorDrawer(
+      () -> ayahCoordinates,
+      () -> hadithAyahs,
+      () -> isNightMode
   );
 
   private final ImageDrawHelper glyphBoundsDebuggingDrawer = DEBUG_BOUNDS ?
@@ -206,6 +218,17 @@ public class HighlightingImageView extends AppCompatImageView {
   public void setPageData(PageCoordinates pageCoordinates, Set<ImageDrawHelper> imageDrawHelpers) {
     this.imageDrawHelpers = imageDrawHelpers;
     this.pageCoordinates = pageCoordinates;
+  }
+
+  public void setHadithAyahs(Set<SuraAyah> hadithAyahs) {
+    this.hadithAyahs = hadithAyahs;
+    invalidate();
+  }
+
+  /** The ayah with hadiths whose ayah number is at this point in page coordinates, if any. */
+  @Nullable
+  public SuraAyah getHadithAyahAt(float pageX, float pageY) {
+    return hadithIndicatorDrawer.ayahAt(pageX, pageY);
   }
 
   public void setAyahData(AyahCoordinates ayahCoordinates) {
@@ -557,6 +580,7 @@ public class HighlightingImageView extends AppCompatImageView {
     // Draw remaining highlights (other than HIDE, COLOR)
     if (pageCoordinates != null) {
       highlightsDrawer.draw(pageCoordinates, canvas, this);
+      hadithIndicatorDrawer.draw(pageCoordinates, canvas, this);
     }
 
     // Draw overlay text

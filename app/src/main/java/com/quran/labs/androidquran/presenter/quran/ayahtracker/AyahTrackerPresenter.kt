@@ -38,6 +38,7 @@ import com.quran.labs.androidquran.ui.helpers.AyahTracker
 import com.quran.labs.androidquran.ui.helpers.HighlightTypes
 import com.quran.labs.androidquran.util.QuranFileUtils
 import com.quran.labs.androidquran.util.QuranSettings
+import com.quran.mobile.feature.hadith.data.HadithRepository
 import com.quran.mobile.translation.model.LocalTranslation
 import com.quran.page.common.data.AyahCoordinates
 import com.quran.page.common.data.PageCoordinates
@@ -55,6 +56,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @QuranPageScope
 class AyahTrackerPresenter @Inject constructor(
@@ -66,6 +68,7 @@ class AyahTrackerPresenter @Inject constructor(
   private val bookmarksDao: BookmarksDao,
   private val highlightsDao: HighlightsDao,
   private val readingBookmarksDao: ReadingBookmarksDao,
+  private val hadithRepository: HadithRepository,
   private val audioStatusRepository: AudioStatusRepository,
   recitationPresenter: RecitationPresenter,
   private val recitationEventPresenter: RecitationEventPresenter,
@@ -106,6 +109,26 @@ class AyahTrackerPresenter @Inject constructor(
     readingBookmarksDao.readingBookmarksFlow()
       .onEach { readingBookmarks -> onReadingBookmarksChanged(readingBookmarks) }
       .launchIn(scope)
+
+    scope.launch { showHadithIndicators() }
+  }
+
+  private suspend fun showHadithIndicators() {
+    val links = hadithRepository.links()
+    items.forEach { tracker ->
+      val bounds = quranInfo.getPageBounds(tracker.page)
+      val iterator = SuraAyahIterator(
+        quranInfo, SuraAyah(bounds[0], bounds[1]), SuraAyah(bounds[2], bounds[3])
+      )
+      val ayahs = mutableSetOf<SuraAyah>()
+      while (iterator.next()) {
+        val suraAyah = SuraAyah(iterator.sura, iterator.ayah)
+        if (links.hasAyahHadiths(suraAyah)) {
+          ayahs.add(suraAyah)
+        }
+      }
+      tracker.onSetHadithAyahs(tracker.page, ayahs)
+    }
   }
 
   fun setPageBounds(pageCoordinates: PageCoordinates) {
@@ -324,10 +347,29 @@ class AyahTrackerPresenter @Inject constructor(
     } else if (eventType == SINGLE_TAP && recitationEventPresenter.hasRecitationSession()) {
       handleTap(event, eventType, page)
     } else {
-      // normal click
-      readingEventPresenter.onClick()
+      // a tap on an ayah number with hadiths opens them, any other tap is a normal click
+      val hadithAyah = if (eventType == SINGLE_TAP) {
+        getHadithAyahForPosition(page, event.x, event.y)
+      } else {
+        null
+      }
+      if (hadithAyah != null && activity is PagerActivity) {
+        activity.showHadithSheet(hadithAyah)
+      } else {
+        readingEventPresenter.onClick()
+      }
     }
     return true
+  }
+
+  private fun getHadithAyahForPosition(page: Int, x: Float, y: Float): SuraAyah? {
+    for (item in items) {
+      val ayah = item.getHadithAyahForPosition(page, x, y)
+      if (ayah != null) {
+        return ayah
+      }
+    }
+    return null
   }
 
   private fun handleAyahSelection(

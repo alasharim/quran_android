@@ -135,6 +135,9 @@ import com.quran.mobile.feature.ayahbookmark.AyahBookmarkWrapper
 import com.quran.mobile.feature.ayahbookmark.di.AyahBookmarkWrapperInjector
 import com.quran.mobile.feature.ayahbookmark.readingbookmark.ReadingBookmarkSheetWrapper
 import com.quran.mobile.feature.ayahbookmark.readingbookmark.di.ReadingBookmarkSheetWrapperInjector
+import com.quran.mobile.feature.hadith.HadithSheetWrapper
+import com.quran.mobile.feature.hadith.data.HadithRepository
+import com.quran.mobile.feature.hadith.di.HadithSheetWrapperInjector
 import com.quran.mobile.feature.qarilist.QariListWrapper
 import com.quran.mobile.feature.qarilist.di.QariListWrapperInjector
 import com.quran.mobile.translation.model.LocalTranslation
@@ -181,6 +184,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   AyahSelectedListener, JumpDestination, QuranReadingActivityComponentProvider,
   QuranReadingPageComponentProvider, AyahToolBarInjector, QariListWrapperInjector,
   AudioBarInjector, AyahBookmarkWrapperInjector, ReadingBookmarkSheetWrapperInjector,
+  HadithSheetWrapperInjector,
   ActivityCompat.OnRequestPermissionsResultCallback, AudioPresenterScreen,
   ReadingBookmarkPresenter.Screen {
   private var lastPopupTime: Long = 0
@@ -231,6 +235,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
   @Inject lateinit var quranNavigator: QuranNavigator
 
   @Inject lateinit var bookmarksDao: BookmarksDao
+  @Inject lateinit var hadithRepository: HadithRepository
   @Inject lateinit var recentPagePresenter: RecentPagePresenter
   @Inject lateinit var readingBookmarkPresenter: ReadingBookmarkPresenter
   @Inject lateinit var quranSettings: QuranSettings
@@ -794,6 +799,7 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     if (haveSelection) {
       val startPosition = startPosition(ayahSelection)
       updateLocalTranslations(startPosition)
+      updateHadithMenuItem(startPosition)
       onClearAyahModeBackCallback.isEnabled = selectionStart != null
     } else {
       endAyahMode()
@@ -971,6 +977,10 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     readingBookmarkSheetWrapper: ReadingBookmarkSheetWrapper
   ) {
     pagerActivityComponent.inject(readingBookmarkSheetWrapper)
+  }
+
+  override fun injectHadithSheetWrapper(hadithSheetWrapper: HadithSheetWrapper) {
+    pagerActivityComponent.inject(hadithSheetWrapper)
   }
 
   override fun provideQuranReadingActivityComponent(): QuranReadingActivityComponent {
@@ -1788,6 +1798,34 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
     toggleActionBarVisibility(false)
   }
 
+  fun showHadithSheet(suraAyah: SuraAyah) {
+    val hadithSheetWrapper = HadithSheetWrapper(this, suraAyah) {
+      overlay.removeAllViews()
+      overlay.visibility = View.GONE
+      toggleActionBarVisibility(true)
+    }
+    overlay.removeAllViews()
+    overlay.addView(
+      hadithSheetWrapper,
+      ViewGroup.LayoutParams.MATCH_PARENT,
+      ViewGroup.LayoutParams.MATCH_PARENT
+    )
+    overlay.visibility = View.VISIBLE
+    toggleActionBarVisibility(false)
+  }
+
+  private fun updateHadithMenuItem(suraAyah: SuraAyah?) {
+    lifecycleScope.launch {
+      val hasHadiths = suraAyah != null && hadithRepository.links().hasHadiths(suraAyah)
+      // the selection may have moved on while the links were loading
+      if (selectionStart == suraAyah) {
+        ayahToolBar.setMenuItemVisibility(
+          com.quran.labs.androidquran.common.toolbar.R.id.cab_hadith_ayah, hasHadiths
+        )
+      }
+    }
+  }
+
   fun updatePlayOptions(
     rangeRepeat: Int,
     verseRepeat: Int,
@@ -1900,6 +1938,8 @@ class PagerActivity : AppCompatActivity(), AudioBarListener, OnBookmarkTagsUpdat
       val itemId = item.itemId
       if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_bookmark_ayah) {
         showAyahBookmarkSheet(startSuraAyah)
+      } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_hadith_ayah) {
+        showHadithSheet(startSuraAyah)
       } else if (itemId == com.quran.labs.androidquran.common.toolbar.R.id.cab_translate_ayah) {
         sliderPage =
           slidingPagerAdapter.getPagePosition(SlidingPagerAdapter.TRANSLATION_PAGE)

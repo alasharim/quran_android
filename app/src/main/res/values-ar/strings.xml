@@ -331,4 +331,6 @@
   </string>
   <string name="comma">"،"</string>
 
+  <!-- label beside the ayah number of ayat with linked hadiths -->
+  <string name="hadith_indicator_label">أحاديث</string>
 </resources>

@@ -31,6 +31,12 @@ class AyahTranslationTrackerItem(
     }
   }
 
+  override fun onSetHadithAyahs(page: Int, ayahs: Set<SuraAyah>) {
+    if (this.page == page) {
+      ayahView.setHadithAyahs(ayahs)
+    }
+  }
+
   override fun onUnHighlightAyahType(type: HighlightType) {
     ayahView.unhighlightAyat(type)
   }
