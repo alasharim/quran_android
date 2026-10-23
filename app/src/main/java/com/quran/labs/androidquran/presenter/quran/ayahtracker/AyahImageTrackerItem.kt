@@ -130,7 +130,7 @@ open class AyahImageTrackerItem @JvmOverloads constructor(
       val screenWidth = ayahView.width
       if (bounds != null && screenWidth > 0) {
         val yPadding = ayahView.paddingTop
-        val xPadding = if (isPageOnRightSide) ayahView.width else 0
+        val xPadding = ayahView.paddingLeft + if (isPageOnRightSide) ayahView.width else 0
         return ImageAyahUtils.getToolBarPosition(bounds, ayahView.imageMatrix, xPadding, yPadding)
       }
     }

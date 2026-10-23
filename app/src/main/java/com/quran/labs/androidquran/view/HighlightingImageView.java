@@ -67,6 +67,7 @@ public class HighlightingImageView extends AppCompatImageView {
   private static int scrollableHeaderFooterFontSize;
   private static int dualPageHeaderFooterSize;
   private static int dualPageHeaderFooterFontSize;
+  private static int pageContentInset;
 
   // Sorted map so we use highest priority highlighting when iterating
   private final SortedMap<HighlightType, Set<AyahHighlight>> currentHighlights = new TreeMap<>();
@@ -149,6 +150,7 @@ public class HighlightingImageView extends AppCompatImageView {
           res.getDimensionPixelSize(R.dimen.page_overlay_font_size_scrollable);
       dualPageHeaderFooterFontSize =
           res.getDimensionPixelSize(R.dimen.page_overlay_font_size_dualPage);
+      pageContentInset = res.getDimensionPixelSize(R.dimen.page_content_inset);
     }
 
     Insetter.builder()
@@ -158,10 +160,7 @@ public class HighlightingImageView extends AppCompatImageView {
             topSafeOffset = cutout.getSafeInsetTop();
             bottomSafeOffset = cutout.getSafeInsetBottom();
             horizontalSafeOffset = Math.max(cutout.getSafeInsetLeft(), cutout.getSafeInsetRight());
-            setPadding(horizontalSafeOffset,
-                topSafeOffset + verticalOffsetForScrolling,
-                horizontalSafeOffset,
-                bottomSafeOffset + verticalOffsetForScrolling);
+            updatePadding();
           }
         })
         .applyToView(this);
@@ -171,12 +170,16 @@ public class HighlightingImageView extends AppCompatImageView {
     int topBottom = scrollable ? scrollableHeaderFooterSize :
         landscape ? dualPageHeaderFooterSize : headerFooterSize;
     verticalOffsetForScrolling = topBottom;
-    setPadding(horizontalSafeOffset,
-        topBottom + topSafeOffset,
-        horizontalSafeOffset,
-        topBottom + bottomSafeOffset);
+    updatePadding();
     fontSize = scrollable ? scrollableHeaderFooterFontSize :
         landscape ? dualPageHeaderFooterFontSize : headerFooterFontSize;
+  }
+
+  private void updatePadding() {
+    setPadding(horizontalSafeOffset + pageContentInset,
+        topSafeOffset + verticalOffsetForScrolling + pageContentInset,
+        horizontalSafeOffset + pageContentInset,
+        bottomSafeOffset + verticalOffsetForScrolling + pageContentInset);
   }
 
   public void unHighlight(int surah, int ayah, HighlightType type) {
@@ -523,7 +526,7 @@ public class HighlightingImageView extends AppCompatImageView {
 
     overlayParams.paint.setTextAlign(Align.LEFT);
     canvas.drawText(overlayParams.suraText,
-        overlayParams.offsetX + horizontalSafeOffset,
+        overlayParams.offsetX + getPaddingLeft(),
         overlayParams.topBaseline + topSafeOffset,
         overlayParams.paint);
     overlayParams.paint.setTextAlign(Align.CENTER);
@@ -534,7 +537,7 @@ public class HighlightingImageView extends AppCompatImageView {
     // Merge the current rub3 text with the juz' text
     overlayParams.paint.setTextAlign(Align.RIGHT);
     canvas.drawText(overlayParams.juzText + overlayParams.rub3Text + overlayParams.manzilText,
-        (getWidth() - overlayParams.offsetX) - horizontalSafeOffset,
+        (getWidth() - overlayParams.offsetX) - getPaddingRight(),
         overlayParams.topBaseline + topSafeOffset,
         overlayParams.paint);
     didDraw = true;

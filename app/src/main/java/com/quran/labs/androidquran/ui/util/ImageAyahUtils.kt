@@ -165,8 +165,11 @@ object ImageAyahUtils {
     val inverse = Matrix()
     if (imageView.imageMatrix.invert(inverse)) {
       results = FloatArray(2)
-      inverse.mapPoints(results, floatArrayOf(screenX, screenY))
-      results[1] = results[1] - imageView.paddingTop
+      // the image matrix doesn't include the view's padding, so remove it before mapping
+      inverse.mapPoints(
+        results,
+        floatArrayOf(screenX - imageView.paddingLeft, screenY - imageView.paddingTop)
+      )
     }
     return results
   }

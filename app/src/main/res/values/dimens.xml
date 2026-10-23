@@ -24,6 +24,9 @@
   <dimen name="page_overlay_size_scrollable">20dp</dimen>
   <dimen name="page_overlay_size_dualPage">12dp</dimen>
 
+  <!-- extra space kept around the page image on every side -->
+  <dimen name="page_content_inset">10dp</dimen>
+
   <!-- how far an empty highlight colour dims in the list; light rows need more of a drop -->
   <item name="empty_highlight_alpha" format="float" type="dimen">0.35</item>
 
